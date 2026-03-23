@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBatis SQL 格式化工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3f37c9;
+            --secondary-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --danger-color: #f94144;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 30px;
+            color: var(--dark-color);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(67, 97, 238, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(76, 201, 240, 0.03) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 35px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+            z-index: 1;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-light), var(--secondary-color), var(--primary-light));
+            z-index: 2;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            line-height: 1.4;
+            position: relative;
+            z-index: 2;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .content {
+            padding: 5px 40px;
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .main-section {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .side-section {
+            width: 320px;
+            position: relative;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 1em;
+        }
+
+        label i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e1e8ed;
+            border-radius: var(--border-radius);
+            font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            transition: var(--transition);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+
+        .sql-input {
+            height: 200px;
+        }
+
+        .result-output {
+            height: 220px;
+            background-color: #f8f9fa;
+            border-color: #e9ecef;
+        }
+
+        .button-group {
+            text-align: center;
+            margin: 25px 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(67, 97, 238, 0.15);
+        }
+
+        button i {
+            margin-right: 8px;
+            font-size: 1em;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(67, 97, 238, 0.1);
+        }
+
+        .clear-btn {
+            background: var(--danger-color);
+            box-shadow: 0 4px 6px rgba(249, 65, 68, 0.15);
+        }
+
+        .clear-btn:hover {
+            background: #e71d36;
+            box-shadow: 0 6px 12px rgba(249, 65, 68, 0.2);
+        }
+
+        .copy-btn {
+            background: var(--success-color);
+            box-shadow: 0 4px 6px rgba(76, 201, 240, 0.15);
+        }
+
+        .copy-btn:hover {
+            background: #3bb4d3;
+            box-shadow: 0 6px 12px rgba(76, 201, 240, 0.2);
+        }
+
+        .example {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-light);
+            padding: 20px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            font-size: 0.95em;
+            height: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .example::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, transparent 70%, rgba(76, 201, 240, 0.1) 100%);
+            z-index: 1;
+        }
+
+        .example h3 {
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+
+        .example h3 i {
+            margin-right: 10px;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        .example-content {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #555;
+            white-space: pre-wrap;
+            background: #fff;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .example-step {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-number {
+            background: var(--primary-color);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-text {
+            flex: 1;
+            padding-top: 3px;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            font-size: 0.95em;
+        }
+
+        .toast i {
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        /* Custom modal dialog */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-container {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-header i {
+            font-size: 1.5em;
+            margin-right: 12px;
+            color: var(--warning-color);
+        }
+
+        .modal-header h3 {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-size: 14px;
+        }
+
+        .modal-btn-cancel {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #dee2e6;
+        }
+
+        .modal-btn-confirm {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background-color: #e71d36;
+        }
+
+        /* Dark mode for modal */
+        body.dark-mode .modal-container {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .modal-body {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .modal-btn-cancel {
+            background-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .modal-btn-cancel:hover {
+            background-color: #555;
+        }
+
+        /* Keyboard shortcut hints */
+        .shortcut-hint {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: rgba(0,0,0,0.05);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--gray-color);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1em;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(15deg);
+        }
+
+        /* Decorative elements */
+        .decoration {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        .decoration-1 {
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--primary-light);
+            border-radius: 50%;
+            opacity: 0.15;
+        }
+
+        .decoration-2 {
+            bottom: 30px;
+            right: 40px;
+            width: 40px;
+            height: 40px;
+            background: var(--secondary-color);
+            border-radius: 8px;
+            transform: rotate(45deg);
+            opacity: 0.1;
+        }
+
+        .decoration-3 {
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 80px;
+            border: 3px solid var(--success-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.08;
+        }
+
+        .decoration-dots {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-image: radial-gradient(circle, var(--primary-color) 1px, transparent 1px);
+            background-size: 10px 10px;
+            opacity: 0.1;
+        }
+
+        .dots-1 {
+            top: 10px;
+            right: 10px;
+        }
+
+        .dots-2 {
+            bottom: 10px;
+            left: 10px;
+        }
+
+        /* Section decorations */
+        .section-decoration {
+            position: absolute;
+            z-index: 0;
+            opacity: 0.05;
+        }
+
+        .section-decoration-1 {
+            top: 20px;
+            right: 20px;
+            font-size: 60px;
+            color: var(--primary-color);
+        }
+
+        .section-decoration-2 {
+            bottom: 20px;
+            left: 20px;
+            font-size: 50px;
+            color: var(--success-color);
+        }
+
+        /* Feature badges */
+        .feature-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-badge {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-badge i {
+            margin-right: 6px;
+            font-size: 0.9em;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background: #121212;
+            color: #e0e0e0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(67, 97, 238, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(76, 201, 240, 0.05) 0%, transparent 50%);
+        }
+
+        body.dark-mode .container {
+            background: #1e1e1e;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .header {
+            background: linear-gradient(135deg, #3a0ca3 0%, #4361ee 100%);
+        }
+
+        body.dark-mode textarea {
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        body.dark-mode .result-output {
+            background: #2d2d2d;
+            border-color: #444;
+        }
+
+        body.dark-mode label {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .example {
+            background: #2d2d2d;
+            border-color: var(--primary-color);
+        }
+
+        body.dark-mode .example-content {
+            background: #252525;
+            color: #ccc;
+            border-color: #444;
+        }
+
+        body.dark-mode .feature-badge {
+            background: rgba(67, 97, 238, 0.15);
+            color: #7b96ff;
+        }
+
+        .try-example-btn {
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            width: 100%;
+            box-shadow: 0 3px 6px rgba(76, 201, 240, 0.2);
+        }
+
+        .try-example-btn:hover {
+            background: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(76, 201, 240, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+                padding: 20px;
+            }
+            
+            .side-section {
+                width: 100%;
+                order: -1;
+            }
+            
+            .header {
+                padding: 25px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button id="themeToggle" class="theme-toggle" title="切换深色/浅色模式">
+            <i class="fas fa-moon"></i>
+        </button>
+        
+        <div class="header">
+            <h1>MyBatis SQL 格式化工具</h1>
+            <p>将控制台输出的SQL语句和参数组装成完整的可执行SQL</p>
+        </div>
+        
+        <div class="content">
+            <div class="main-section">
+                <!-- Decorative elements -->
+                <div class="section-decoration section-decoration-1">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="section-decoration section-decoration-2">
+                    <i class="fas fa-code"></i>
+                </div>
+                
+                <div class="feature-badges">
+                    <div class="feature-badge"><i class="fas fa-bolt"></i> 快速格式化</div>
+                    <div class="feature-badge"><i class="fas fa-magic"></i> 智能参数替换</div>
+                    <div class="feature-badge"><i class="fas fa-keyboard"></i> 快捷键支持</div>
+                </div>
+                
+                <div class="input-section">
+                    <div class="input-group">
+                        <label for="logInput"><i class="fas fa-code"></i> MyBatis日志</label>
+                        <div class="shortcut-hint">Ctrl+Enter 格式化</div>
+                        <textarea id="logInput" class="sql-input" placeholder="粘贴MyBatis日志内容到这里..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button onclick="formatSQL()"><i class="fas fa-magic"></i> 格式化</button>
+                    <button class="copy-btn" onclick="copyResult()"><i class="fas fa-copy"></i> 复制</button>
+                    <button class="clear-btn" onclick="clearAll()"><i class="fas fa-trash-alt"></i> 清空</button>
+                </div>
+                
+                <div class="input-group">
+                    <label for="resultOutput"><i class="fas fa-check-circle"></i> 格式化结果</label>
+                    <textarea id="resultOutput" class="result-output" readonly placeholder="格式化后的SQL将显示在这里..."></textarea>
+                </div>
+            </div>
+            
+            <div class="side-section">
+                <div class="example">
+                    <!-- Decorative dots -->
+                    <div class="decoration-dots dots-1"></div>
+                    <div class="decoration-dots dots-2"></div>
+                    
+                    <h3><i class="fas fa-lightbulb"></i> 使用示例</h3>
+                    
+                    <div class="example-step">
+                        <div class="step-number">1</div>
+                        <div class="step-text">复制MyBatis日志</div>
+                    </div>
+                    
+                    <div class="example-content">==>  Preparing: SELECT * FROM users WHERE id = ?
+==>  Parameters: 123(Integer)</div>
+                    
+                    <div class="example-step">
+                        <div class="step-number">2</div>
+                        <div class="step-text">粘贴到输入框，点击"格式化"按钮</div>
+                    </div>
+                    
+                    <div class="example-step">
+                        <div class="step-number">3</div>
+                        <div class="step-text">获得可执行的SQL:</div>
+                    </div>
+                    
+                    <div class="example-content">SELECT * FROM users WHERE id = 123</div>
+                    
+                    <button id="tryExampleBtn" class="try-example-btn">
+                        <i class="fas fa-play"></i> 试用此示例
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Decorative elements -->
+        <div class="decoration decoration-1"></div>
+        <div class="decoration decoration-2"></div>
+        <div class="decoration decoration-3"></div>
+    </div>
+    
+    <div id="toast" class="toast"><i class="fas fa-check-circle"></i> 复制成功！</div>
+    
+    <!-- Custom confirmation modal -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>确认清空</h3>
+            </div>
+            <div class="modal-body">
+                <p>确定要清空所有内容吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelClear" class="modal-btn modal-btn-cancel">取消</button>
+                <button id="confirmClear" class="modal-btn modal-btn-confirm">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 初始化主题
+        function initTheme() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        }
+
+        // 切换深色/浅色模式
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                localStorage.setItem('darkMode', 'false');
+            }
+        }
+
+        function formatSQL() {
+            const logInput = document.getElementById('logInput').value.trim();
+            const resultOutput = document.getElementById('resultOutput');
+            
+            if (!logInput) {
+                showToast('请输入MyBatis日志', 'warning');
+                return;
+            }
+            
+            try {
+                // 解析MyBatis日志
+                const logResult = parseMyBatisLog(logInput);
+                const sql = logResult.sql;
+                const params = logResult.params;
+                
+                // 替换SQL中的占位符
+                let formattedSQL = sql;
+                let paramIndex = 0;
+                
+                // 替换所有的 ? 占位符
+                formattedSQL = formattedSQL.replace(/\?/g, function() {
+                    if (paramIndex < params.length) {
+                        return params[paramIndex++];
+                    }
+                    return '?'; // 如果参数不够，保持原样
+                });
+                
+                // 格式化SQL
+                formattedSQL = beautifySQL(formattedSQL);
+                
+                resultOutput.value = formattedSQL;
+                
+                // 检查参数数量是否匹配
+                const questionMarks = (sql.match(/\?/g) || []).length;
+                if (questionMarks !== params.length) {
+                    showToast(`警告：SQL中有${questionMarks}个占位符，但提供了${params.length}个参数`, 'warning');
+                } else {
+                    showToast('SQL格式化成功！', 'success');
+                }
+                
+            } catch (error) {
+                showToast('解析失败：' + error.message, 'error');
+            }
+        }
+        
+        function beautifySQL(sql) {
+            // 移除多余的空白字符
+            sql = sql.replace(/\s+/g, ' ').trim();
+            
+            // 需要换行的关键字
+            const lineBreakKeywords = [
+                'SELECT', 'FROM', 'WHERE', 'GROUP BY', 'HAVING', 
+                'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE',
+                'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'JOIN', 'ON', 'UNION',
+                'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'DISTINCT',
+                'ORDER BY', 'LIMIT'
+            ];
+            
+            // 为需要换行的关键字添加换行和缩进
+            lineBreakKeywords.forEach(keyword => {
+                const regex = new RegExp('\\b' + keyword + '\\b', 'gi');
+                sql = sql.replace(regex, (match) => {
+                    if (keyword.includes('JOIN') || keyword === 'ON') {
+                        return '\n  ' + match.toUpperCase();
+                    } else {
+                        return '\n' + match.toUpperCase();
+                    }
+                });
+            });
+            
+            // 处理WHERE条件：AND和OR换行
+            sql = sql.replace(/\b(AND|OR)\b/gi, (match) => {
+                return '\n    ' + match.toUpperCase();
+            });
+            
+            // 处理逗号后的换行（但不影响函数内的逗号）
+            sql = sql.replace(/,(?![^()]*\))/g, ',\n    ');
+            
+            // 清理多余的空行
+            sql = sql.replace(/\n\s*\n/g, '\n');
+            
+            // 去掉开头的换行符
+            sql = sql.replace(/^\n+/, '');
+            
+            return sql;
+        }
+        
+        function parseMyBatisLog(logStr) {
+            const lines = logStr.split('\n').map(line => line.trim()).filter(line => line);
+            let sql = '';
+            let params = [];
+            
+            for (const line of lines) {
+                // 匹配 Preparing 行（SQL语句）
+                const preparingMatch = line.match(/==>\s*Preparing:\s*(.+)$/);
+                if (preparingMatch) {
+                    sql = preparingMatch[1].trim();
+                    continue;
+                }
+                
+                // 匹配 Parameters 行（参数）
+                const parametersMatch = line.match(/==>\s*Parameters:\s*(.+)$/);
+                if (parametersMatch) {
+                    const paramStr = parametersMatch[1].trim();
+                    if (paramStr && paramStr !== 'null') {
+                        params = parseMyBatisParameters(paramStr);
+                    }
+                    continue;
+                }
+            }
+            
+            if (!sql) {
+                throw new Error('未找到SQL语句，请检查日志格式');
+            }
+            
+            return { sql, params };
+        }
+        
+        function parseMyBatisParameters(paramStr) {
+            // MyBatis参数格式: HANA(String), 123(Integer), null, true(Boolean)
+            const params = [];
+            
+            // 智能分割参数，处理括号内的逗号
+            const parts = smartSplitParameters(paramStr);
+            
+            for (const part of parts) {
+                if (!part) continue;
+                
+                // 提取类型信息
+                const typeMatch = part.match(/\(([^)]+)\)$/);
+                const type = typeMatch ? typeMatch[1].trim().toLowerCase() : '';
+                
+                // 移除类型信息，获取值
+                let value = part.replace(/\([^)]+\)$/, '').trim();
+                
+                // 处理不同类型的值
+                if (value.toLowerCase() === 'null') {
+                    params.push('NULL');
+                } else if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
+                    params.push(value.toUpperCase());
+                } else if (type.includes('int') && /^-?\d+$/.test(value)) {
+                    // 整数类型
+                    params.push(value);
+                } else if ((type.includes('decimal') || type.includes('double') || type.includes('float')) && /^-?\d+(\.\d+)?$/.test(value)) {
+                    // 浮点数类型
+                    params.push(value);
+                } else {
+                    // 字符串类型，添加单引号
+                    params.push("'" + value.replace(/'/g, "''") + "'");
+                }
+            }
+            
+            return params;
+        }
+        
+        function smartSplitParameters(paramStr) {
+            // 基于类型标识的智能分割，以 )后的逗号或空白+逗号为分割点
+            const result = [];
+            let i = 0;
+            
+            while (i < paramStr.length) {
+                // 跳过开头的空白
+                while (i < paramStr.length && /\s/.test(paramStr[i])) {
+                    i++;
+                }
+                
+                if (i >= paramStr.length) break;
+                
+                let paramStart = i;
+                let paramEnd = i;
+                let foundTypeEnd = false;
+                
+                // 查找参数结束位置
+                while (i < paramStr.length) {
+                    if (paramStr[i] === ')') {
+                        // 找到类型标识结束
+                        paramEnd = i;
+                        foundTypeEnd = true;
+                        i++;
+                        
+                        // 跳过 ) 后的空白
+                        while (i < paramStr.length && /\s/.test(paramStr[i])) {
+                            i++;
+                        }
+                        
+                        // 如果遇到逗号或到达末尾，参数结束
+                        if (i >= paramStr.length || paramStr[i] === ',') {
+                            if (paramStr[i] === ',') {
+                                i++; // 跳过逗号
+                            }
+                            break;
+                        }
+                    } else {
+                        i++;
+                    }
+                }
+                
+                // 如果没有找到类型标识，可能是 null 或其他特殊值
+                if (!foundTypeEnd) {
+                    // 查找下一个逗号或字符串结束
+                    while (i < paramStr.length && paramStr[i] !== ',') {
+                        i++;
+                    }
+                    paramEnd = i - 1;
+                    if (paramStr[i] === ',') {
+                        i++; // 跳过逗号
+                    }
+                }
+                
+                // 提取参数
+                const param = paramStr.substring(paramStart, paramEnd + 1).trim();
+                if (param) {
+                    result.push(param);
+                }
+            }
+            
+            return result;
+        }
+        
+        function copyResult() {
+            const resultOutput = document.getElementById('resultOutput');
+            if (!resultOutput.value.trim()) {
+                showToast('没有可复制的内容', 'warning');
+                return;
+            }
+            
+            // 使用现代剪贴板API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(resultOutput.value)
+                    .then(() => {
+                        showToast('复制成功！', 'success');
+                    })
+                    .catch(err => {
+                        // 如果API失败，回退到传统方法
+                        fallbackCopy(resultOutput);
+                    });
+            } else {
+                // 回退到传统方法
+                fallbackCopy(resultOutput);
+            }
+        }
+        
+        function fallbackCopy(element) {
+            element.select();
+            document.execCommand('copy');
+            showToast('复制成功！', 'success');
+        }
+        
+        function clearAll() {
+            const logInput = document.getElementById('logInput');
+            const resultOutput = document.getElementById('resultOutput');
+            
+            if (logInput.value.trim() || resultOutput.value.trim()) {
+                showConfirmModal();
+            }
+        }
+        
+        function showConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('show');
+            
+            // Set up event listeners for the modal buttons
+            document.getElementById('cancelClear').onclick = function() {
+                hideConfirmModal();
+            };
+            
+            document.getElementById('confirmClear').onclick = function() {
+                document.getElementById('logInput').value = '';
+                document.getElementById('resultOutput').value = '';
+                hideConfirmModal();
+                showToast('已清空所有内容', 'info');
+            };
+            
+            // Close modal when clicking outside
+            modal.onclick = function(event) {
+                if (event.target === modal) {
+                    hideConfirmModal();
+                }
+            };
+            
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('show')) {
+                    hideConfirmModal();
+                }
+            });
+        }
+        
+        function hideConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('show');
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            
+            // 设置图标和颜色
+            let icon = 'fa-check-circle';
+            let color = 'var(--success-color)';
+            
+            if (type === 'warning') {
+                icon = 'fa-exclamation-triangle';
+                color = 'var(--warning-color)';
+            } else if (type === 'error') {
+                icon = 'fa-times-circle';
+                color = 'var(--danger-color)';
+            } else if (type === 'info') {
+                icon = 'fa-info-circle';
+                color = 'var(--primary-light)';
+            }
+            
+            toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            toast.style.background = color;
+            
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                formatSQL();
+                e.preventDefault();
+            } else if (e.ctrlKey && e.key === 'c' && document.activeElement.id === 'resultOutput') {
+                copyResult();
+            }
+        });
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            
+            // 添加示例按钮功能
+            document.getElementById('tryExampleBtn').addEventListener('click', function() {
+                const example = `==>  Preparing: SELECT * FROM users WHERE id = ?
+==>  Parameters: 123(Integer)`;
+                document.getElementById('logInput').value = example;
+                formatSQL();
+            });
+        });
+    </script>
+</body>
+</html>

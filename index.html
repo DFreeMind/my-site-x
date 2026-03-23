@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线工具集 - 高效便捷的开发者工具箱</title>
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "nt3awcx6ci");
+    </script>
+    <style>
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --info: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8d1;
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 16px 64px rgba(0, 0, 0, 0.4);
+            
+            --radius: 16px;
+            --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 粒子背景画布 */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* 背景渐变 */
+        body {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 30%, #16213e 60%, #0f3460 100%);
+            background-attachment: fixed;
+        }
+
+        /* 环境光效 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 15% 15%, rgba(102, 126, 234, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(118, 75, 162, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(240, 147, 251, 0.08) 0%, transparent 50%);
+            z-index: -1;
+            animation: ambientPulse 15s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes ambientPulse {
+            0% { 
+                opacity: 0.4;
+                transform: scale(0.95);
+            }
+            100% { 
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
+
+        /* 流星效果 */
+        .meteor {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: radial-gradient(circle, #ffffff 0%, rgba(102, 126, 234, 0.8) 70%, transparent 100%);
+            border-radius: 50%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .meteor::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(102, 126, 234, 0.6) 50%, transparent 100%);
+            transform: translate(-50%, -50%) rotate(45deg);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        @keyframes meteorFly {
+            0% {
+                transform: translate(-100px, 100px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(calc(100vw + 100px), -100px);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 头部区域 */
+        .header {
+            text-align: center;
+            padding: 60px 0 40px;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 搜索框 */
+        .search-container {
+            max-width: 500px;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 16px 24px 16px 56px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 16px;
+            backdrop-filter: blur(20px);
+            transition: var(--transition);
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        /* 分类导航 */
+        .category-nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 12px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            backdrop-filter: blur(20px);
+            cursor: pointer;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        /* 工具网格 */
+        .tools-section {
+            margin: 60px 0;
+        }
+
+        .category-section {
+            margin-bottom: 80px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .category-section:nth-child(2) { animation-delay: 0.1s; }
+        .category-section:nth-child(3) { animation-delay: 0.2s; }
+        .category-section:nth-child(4) { animation-delay: 0.3s; }
+        .category-section:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .category-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        /* 工具卡片 */
+        .tool-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 
+                var(--shadow-hover),
+                0 0 40px rgba(102, 126, 234, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        .tool-card:hover::before {
+            transform: scaleX(1);
+            background: linear-gradient(90deg, 
+                rgba(102, 126, 234, 0.8) 0%, 
+                rgba(118, 75, 162, 0.8) 50%, 
+                rgba(102, 126, 234, 0.8) 100%);
+            animation: gradientShift 2s ease-in-out infinite;
+        }
+
+        .tool-card:hover .tool-icon {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .tool-card:hover .tool-info h3 {
+            color: rgba(102, 126, 234, 0.9);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { 
+                background: linear-gradient(90deg, 
+                    rgba(102, 126, 234, 0.8) 0%, 
+                    rgba(118, 75, 162, 0.8) 50%, 
+                    rgba(102, 126, 234, 0.8) 100%);
+            }
+            50% { 
+                background: linear-gradient(90deg, 
+                    rgba(118, 75, 162, 0.8) 0%, 
+                    rgba(240, 147, 251, 0.8) 50%, 
+                    rgba(118, 75, 162, 0.8) 100%);
+            }
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .tool-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .tool-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .tool-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .tool-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+
+        .tool-tag {
+            padding: 4px 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: rgba(102, 126, 234, 0.8);
+        }
+
+        /* 底部 */
+        .footer {
+            text-align: center;
+            padding: 60px 0 40px;
+            border-top: 1px solid var(--border);
+            margin-top: 80px;
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer a:hover {
+            color: var(--text-primary);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .header {
+                padding: 40px 0 30px;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .tool-card {
+                padding: 24px;
+                height: auto;
+                min-height: 160px;
+            }
+
+            .category-nav {
+                gap: 8px;
+            }
+
+            .category-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 加载动画 */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部区域 -->
+        <header class="header">
+            <h1>在线工具集</h1>
+            <p>高效便捷的开发者工具箱，提供编码转换、API测试、可视化等多种实用工具</p>
+        </header>
+
+        <!-- 搜索框 -->
+        <div class="search-container">
+            <div class="search-icon">🔍</div>
+            <input type="text" class="search-box" placeholder="搜索工具..." id="searchInput">
+        </div>
+
+        <!-- 分类导航 -->
+        <nav class="category-nav">
+            <button class="category-btn active" data-category="all">全部</button>
+            <button class="category-btn" data-category="encoding">编码转换</button>
+            <button class="category-btn" data-category="api">API工具</button>
+            <button class="category-btn" data-category="visual">可视化</button>
+            <button class="category-btn" data-category="learning">学习资源</button>
+            <button class="category-btn" data-category="demo">交互演示</button>
+        </nav>
+
+        <!-- 工具区域 -->
+        <main class="tools-section">
+            <!-- 编码转换工具 -->
+            <section class="category-section" data-category="encoding">
+                <h2 class="category-title">
+                    <div class="category-icon">🔄</div>
+                    编码与转换工具
+                </h2>
+                <div class="tools-grid">
+                    <a href="tools/multi-tools.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">🛠️</div>
+                            <div class="tool-info">
+                                <h3>多功能工具集</h3>
+                                <p>Base64编解码、时间戳转换、URL编解码等多种实用工具的集合</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">Base64</span>
+                            <span class="tool-tag">时间戳</span>
+                            <span class="tool-tag">URL编码</span>
+                        </div>
+                    </a>
+
+                    <a href="tools/js-tsid.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">🆔</div>
+                            <div class="tool-info">
+                                <h3>TSID 生成器</h3>
+                                <p>兼容 tsid-creator 的时间排序唯一标识符生成工具，支持批量生成和反解析</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">ID生成</span>
+                            <span class="tool-tag">时间排序</span>
+                            <span class="tool-tag">批量生成</span>
+                        </div>
+                    </a>
+
+                    <a href="tools/js-ulid.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">🔗</div>
+                            <div class="tool-info">
+                                <h3>ULID 生成器</h3>
+                                <p>时间排序的唯一标识符生成工具，支持批量生成和反解析，兼容UUID</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">ULID</span>
+                            <span class="tool-tag">时间排序</span>
+                            <span class="tool-tag">UUID兼容</span>
+                        </div>
+                    </a>
+
+                    <a href="tools/mybatis-format.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">📝</div>
+                            <div class="tool-info">
+                                <h3>MyBatis 格式化</h3>
+                                <p>MyBatis 输出日志格式化工具，让SQL语句更易读</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">SQL</span>
+                            <span class="tool-tag">格式化</span>
+                            <span class="tool-tag">MyBatis</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- API工具 -->
+            <section class="category-section" data-category="api">
+                <h2 class="category-title">
+                    <div class="category-icon">🌐</div>
+                    API 与测试工具
+                </h2>
+                <div class="tools-grid">
+                    <a href="tools/https-test.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">🔧</div>
+                            <div class="tool-info">
+                                <h3>API 测试工具</h3>
+                                <p>简单易用的 HTTP 请求测试工具，支持GET、POST、PUT、DELETE等多种请求方法</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">HTTP</span>
+                            <span class="tool-tag">API测试</span>
+                            <span class="tool-tag">请求调试</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- 可视化工具 -->
+            <section class="category-section" data-category="visual">
+                <h2 class="category-title">
+                    <div class="category-icon">🗺️</div>
+                    地图与可视化
+                </h2>
+                <div class="tools-grid">
+                    <a href="botw/index.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">🎮</div>
+                            <div class="tool-info">
+                                <h3>旷野之息地图</h3>
+                                <p>塞尔达传说：旷野之息互动地图，探索海拉鲁大陆的每一个角落</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">游戏地图</span>
+                            <span class="tool-tag">交互式</span>
+                            <span class="tool-tag">塞尔达</span>
+                        </div>
+                    </a>
+
+                    <a href="hdmap/" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">🛣️</div>
+                            <div class="tool-info">
+                                <h3>高精度地图</h3>
+                                <p>高精度地图数据可视化展示，支持道路、建筑等地理信息的详细显示</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">地图</span>
+                            <span class="tool-tag">高精度</span>
+                            <span class="tool-tag">可视化</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- 学习资源 -->
+            <section class="category-section" data-category="learning">
+                <h2 class="category-title">
+                    <div class="category-icon">📚</div>
+                    学习资源
+                </h2>
+                <div class="tools-grid">
+                    <a href="https://md.aclickall.com/" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">✍️</div>
+                            <div class="tool-info">
+                                <h3>Markdown 编辑器</h3>
+                                <p>功能强大的在线 Markdown 编辑与预览工具，支持实时预览和导出</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">Markdown</span>
+                            <span class="tool-tag">编辑器</span>
+                            <span class="tool-tag">实时预览</span>
+                        </div>
+                    </a>
+
+                    <a href="study/opencv/OpenCV 教程（1）：图片、视频基本操作.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">📷</div>
+                            <div class="tool-info">
+                                <h3>OpenCV 基础教程</h3>
+                                <p>OpenCV 图片、视频基本操作教程，从入门到实践</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">OpenCV</span>
+                            <span class="tool-tag">图像处理</span>
+                            <span class="tool-tag">基础教程</span>
+                        </div>
+                    </a>
+
+                    <a href="study/opencv/OpenCV 教程（2）：进阶操作.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">🔍</div>
+                            <div class="tool-info">
+                                <h3>OpenCV 进阶教程</h3>
+                                <p>OpenCV 进阶操作教程，深入学习图像处理技术</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">OpenCV</span>
+                            <span class="tool-tag">进阶</span>
+                            <span class="tool-tag">图像算法</span>
+                        </div>
+                    </a>
+
+                    <a href="study/opencv/OpenCV 教程（3）：高级与其他.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">🎯</div>
+                            <div class="tool-info">
+                                <h3>OpenCV 高级教程</h3>
+                                <p>OpenCV 高级功能与其他实用技术，掌握专业级图像处理</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">OpenCV</span>
+                            <span class="tool-tag">高级</span>
+                            <span class="tool-tag">专业级</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- 交互演示 -->
+            <section class="category-section" data-category="demo">
+                <h2 class="category-title">
+                    <div class="category-icon">🎨</div>
+                    交互演示
+                </h2>
+                <div class="tools-grid">
+                    <a href="sandbox/click.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">👆</div>
+                            <div class="tool-info">
+                                <h3>可交互道路</h3>
+                                <p>可点击交互的道路演示，体验直观的用户界面交互效果</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">交互</span>
+                            <span class="tool-tag">道路</span>
+                            <span class="tool-tag">点击</span>
+                        </div>
+                    </a>
+
+                    <a href="sandbox/city.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">🏙️</div>
+                            <div class="tool-info">
+                                <h3>复杂城市模型</h3>
+                                <p>3D 城市模型可视化演示，展示复杂的城市建筑和道路网络</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">3D</span>
+                            <span class="tool-tag">城市模型</span>
+                            <span class="tool-tag">可视化</span>
+                        </div>
+                    </a>
+
+                    <a href="sandbox/drag.html" class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon">✋</div>
+                            <div class="tool-info">
+                                <h3>拖动物体到道路</h3>
+                                <p>拖拽交互演示，体验流畅的拖放操作和物理交互效果</p>
+                            </div>
+                        </div>
+                        <div class="tool-tags">
+                            <span class="tool-tag">拖拽</span>
+                            <span class="tool-tag">交互</span>
+                            <span class="tool-tag">物理</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <!-- 底部 -->
+        <footer class="footer">
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">京ICP备2023018941号-1</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // 搜索功能
+        const searchInput = document.getElementById('searchInput');
+        const toolCards = document.querySelectorAll('.tool-card');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const categorySections = document.querySelectorAll('.category-section');
+
+        // 搜索功能
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            toolCards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                const tags = Array.from(card.querySelectorAll('.tool-tag')).map(tag => tag.textContent.toLowerCase()).join(' ');
+                
+                const isMatch = title.includes(searchTerm) || 
+                               description.includes(searchTerm) || 
+                               tags.includes(searchTerm);
+                
+                card.style.display = isMatch ? 'block' : 'none';
+            });
+
+            // 隐藏空的分类
+            categorySections.forEach(section => {
+                const visibleCards = section.querySelectorAll('.tool-card[style="display: block"], .tool-card:not([style*="display: none"])');
+                section.style.display = visibleCards.length > 0 ? 'block' : 'none';
+            });
+        });
+
+        // 分类筛选
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const category = this.dataset.category;
+                
+                // 更新按钮状态
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 清空搜索
+                searchInput.value = '';
+                
+                // 显示/隐藏分类
+                if (category === 'all') {
+                    categorySections.forEach(section => {
+                        section.style.display = 'block';
+                    });
+                    toolCards.forEach(card => {
+                        card.style.display = 'block';
+                    });
+                } else {
+                    categorySections.forEach(section => {
+                        const shouldShow = section.dataset.category === category;
+                        section.style.display = shouldShow ? 'block' : 'none';
+                    });
+                }
+            });
+        });
+
+        // 卡片点击效果
+        toolCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // 添加点击动画
+                this.style.transform = 'translateY(-8px) scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // 平滑滚动到顶部
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K 聚焦搜索框
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            
+            // ESC 清空搜索
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input'));
+                searchInput.blur();
+            }
+        });
+
+        // 添加搜索框提示
+        searchInput.addEventListener('focus', function() {
+            this.placeholder = '输入工具名称、描述或标签进行搜索...';
+        });
+
+        searchInput.addEventListener('blur', function() {
+            this.placeholder = '搜索工具...';
+        });
+
+        // 粒子效果系统
+        class ParticleSystem {
+            constructor() {
+                this.canvas = document.getElementById('particles-canvas');
+                if (!this.canvas) {
+                    console.error('Canvas not found');
+                    return;
+                }
+                
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.particleCount = 120;
+                this.connectionDistance = 120;
+                this.mouse = { x: -1000, y: -1000 };
+                
+                this.resize();
+                this.init();
+                this.animate();
+                
+                window.addEventListener('resize', () => this.resize());
+                document.addEventListener('mousemove', (e) => {
+                    this.mouse.x = e.clientX;
+                    this.mouse.y = e.clientY;
+                });
+                
+                this.createMeteors();
+            }
+            
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.init(); // 重新初始化粒子位置
+            }
+            
+            init() {
+                this.particles = [];
+                for (let i = 0; i < this.particleCount; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        vx: (Math.random() - 0.5) * 0.8,
+                        vy: (Math.random() - 0.5) * 0.8,
+                        size: Math.random() * 3 + 1,
+                        opacity: Math.random() * 0.6 + 0.3,
+                        color: this.getRandomColor(),
+                        pulse: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+            
+            getRandomColor() {
+                const colors = [
+                    { r: 102, g: 126, b: 234 },
+                    { r: 118, g: 75, b: 162 },
+                    { r: 240, g: 147, b: 251 },
+                    { r: 120, g: 219, b: 255 },
+                    { r: 167, g: 243, b: 208 }
+                ];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            animate() {
+                // 清除画布
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 更新和绘制粒子
+                this.particles.forEach((particle) => {
+                    // 更新位置
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.pulse += 0.02;
+                    
+                    // 边界反弹
+                    if (particle.x <= 0 || particle.x >= this.canvas.width) {
+                        particle.vx *= -1;
+                        particle.x = Math.max(0, Math.min(this.canvas.width, particle.x));
+                    }
+                    if (particle.y <= 0 || particle.y >= this.canvas.height) {
+                        particle.vy *= -1;
+                        particle.y = Math.max(0, Math.min(this.canvas.height, particle.y));
+                    }
+                    
+                    // 鼠标交互
+                    const dx = this.mouse.x - particle.x;
+                    const dy = this.mouse.y - particle.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 150) {
+                        const force = (150 - distance) / 150;
+                        particle.x -= (dx / distance) * force * 2;
+                        particle.y -= (dy / distance) * force * 2;
+                    }
+                    
+                    // 计算脉冲效果
+                    const pulseSize = particle.size + Math.sin(particle.pulse) * 0.5;
+                    const pulseOpacity = particle.opacity + Math.sin(particle.pulse) * 0.2;
+                    
+                    // 绘制粒子光晕
+                    const gradient = this.ctx.createRadialGradient(
+                        particle.x, particle.y, 0,
+                        particle.x, particle.y, pulseSize * 3
+                    );
+                    gradient.addColorStop(0, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, ${pulseOpacity})`);
+                    gradient.addColorStop(0.5, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, ${pulseOpacity * 0.3})`);
+                    gradient.addColorStop(1, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, 0)`);
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, pulseSize * 3, 0, Math.PI * 2);
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.fill();
+                    
+                    // 绘制粒子核心
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, pulseSize, 0, Math.PI * 2);
+                    this.ctx.fillStyle = `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, ${Math.min(1, pulseOpacity + 0.3)})`;
+                    this.ctx.fill();
+                });
+                
+                // 绘制连接线
+                this.drawConnections();
+                
+                requestAnimationFrame(() => this.animate());
+            }
+            
+            drawConnections() {
+                for (let i = 0; i < this.particles.length; i++) {
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const dx = this.particles[i].x - this.particles[j].x;
+                        const dy = this.particles[i].y - this.particles[j].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < this.connectionDistance) {
+                            const opacity = (1 - distance / this.connectionDistance) * 0.4;
+                            
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+                            this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+                            this.ctx.strokeStyle = `rgba(102, 126, 234, ${opacity})`;
+                            this.ctx.lineWidth = 1;
+                            this.ctx.stroke();
+                        }
+                    }
+                }
+            }
+            
+            createMeteors() {
+                setInterval(() => {
+                    if (Math.random() < 0.4) {
+                        const meteor = document.createElement('div');
+                        meteor.className = 'meteor';
+                        meteor.style.left = (Math.random() * window.innerWidth) + 'px';
+                        meteor.style.top = (Math.random() * window.innerHeight * 0.3) + 'px';
+                        meteor.style.animation = `meteorFly ${Math.random() * 2 + 3}s linear forwards`;
+                        document.body.appendChild(meteor);
+                        
+                        setTimeout(() => {
+                            if (meteor.parentNode) {
+                                meteor.parentNode.removeChild(meteor);
+                            }
+                        }, 5000);
+                    }
+                }, 2000);
+            }
+        }
+        
+        // 初始化粒子系统
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                new ParticleSystem();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

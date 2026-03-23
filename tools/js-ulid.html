@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ULID 生成器</title>
+  <style>
+    :root {
+      --color-primary: #0ea5e9;
+      --color-primary-dark: #0284c7;
+      --color-primary-light: #7dd3fc;
+      --color-secondary: #10b981;
+      --color-secondary-dark: #059669;
+      --color-danger: #ef4444;
+      --color-bg: #f8fafc;
+      --color-card: #ffffff;
+      --color-border: #e2e8f0;
+      --color-text: #1e293b;
+      --color-text-light: #64748b;
+      --color-heading: #0f172a;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius: 0.5rem;
+      --transition: all 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.5;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: 0.15rem;
+    }
+
+    .header p {
+      font-size: 1rem;
+      color: var(--color-text-light);
+      margin-bottom: 0.25rem;
+    }
+
+    .header-links {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .header-links a {
+      color: var(--color-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .header-links a:hover {
+      text-decoration: underline;
+    }
+
+    .card {
+      background-color: var(--color-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 0.85rem;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .card-icon {
+      background-color: var(--color-primary-light);
+      color: var(--color-primary-dark);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--color-heading);
+      margin: 0;
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 55% 45%;
+      gap: 0.75rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .form-group {
+      margin-bottom: 0.5rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.15rem;
+      color: var(--color-heading);
+      font-size: 0.95rem;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.45rem 0.6rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      transition: var(--transition);
+      background-color: #f8fafc;
+    }
+
+    input[type="number"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+    }
+
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+    }
+
+    .radio-option input[type="radio"] {
+      margin-right: 0.25rem;
+      accent-color: var(--color-primary);
+      transform: scale(1.2);
+    }
+
+    .radio-option label {
+      display: inline;
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.45rem 0.75rem;
+      border-radius: var(--radius);
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--color-primary-dark);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--color-primary);
+      border: 1px solid var(--color-primary);
+    }
+
+    .btn-secondary:hover {
+      background-color: #f0f9ff;
+    }
+
+    .status-box {
+      margin-top: 0.5rem;
+      padding: 0.45rem;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .status-box.loading {
+      background-color: rgba(14, 165, 233, 0.1);
+      color: var(--color-primary);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+
+    .status-box.success {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--color-secondary);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-box.error {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--color-danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .code-wrapper {
+      position: relative;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      background-color: #f8fafc;
+      overflow: hidden;
+      margin-top: 0.35rem;
+      flex: 1;
+      min-height: 0;
+    }
+    
+    .info-section {
+      margin-top: 0.5rem;
+      padding: 0.45rem;
+      border-radius: var(--radius);
+      background-color: #f8fafc;
+      border: 1px solid var(--color-border);
+    }
+    
+    .info-section h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: var(--color-heading);
+      padding-bottom: 0.15rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    .info-item {
+      display: flex;
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+    
+    .info-label {
+      width: 80px;
+      font-weight: 500;
+      color: var(--color-text-light);
+    }
+    
+    .info-value {
+      flex: 1;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+
+    textarea, pre {
+      width: 100%;
+      padding: 0.45rem;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: var(--color-text);
+    }
+
+    textarea {
+      border: none;
+      resize: none;
+      height: 100%;
+      background-color: transparent;
+    }
+
+    textarea:focus {
+      outline: none;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      margin: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-heading);
+      margin: 0.5rem 0 0.25rem 0;
+      padding-bottom: 0.15rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .interval-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 0.15rem;
+    }
+
+    .left-column, .right-column {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--color-text-light);
+    }
+
+    .footer a {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 900px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      
+      .code-wrapper {
+        height: 150px;
+      }
+      
+      body {
+        overflow: auto;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ULID 生成器</h1>
+      <p>时间排序的唯一标识符生成工具</p>
+      <div class="header-links">
+        <a href="https://github.com/ulid/javascript" target="_blank">
+          <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+          </svg>
+          ulid/javascript
+        </a>
+        <a href="https://github.com/f4b6a3/ulid-creator" target="_blank">
+          <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+          </svg>
+          ulid-creator
+        </a>
+      </div>
+    </div>
+
+    <div class="main-layout">
+      <div class="card left-column">
+        <div class="card-header">
+          <div class="card-icon">⚙️</div>
+          <h2 class="card-title">批量生成</h2>
+        </div>
+        
+        <div class="form-group">
+          <label for="count">生成个数</label>
+          <input type="number" id="count" value="10" min="1" max="1000">
+        </div>
+        
+        <div class="form-group">
+          <label>生成间隔</label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" id="intervalNone" name="intervalType" value="none" checked>
+              <label for="intervalNone">无间隔</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="intervalFixed" name="intervalType" value="fixed">
+              <label for="intervalFixed">固定间隔</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="intervalRandom" name="intervalType" value="random">
+              <label for="intervalRandom">随机间隔</label>
+            </div>
+          </div>
+        </div>
+
+        <div id="intervalSettings">
+          <div id="fixedIntervalSection" class="form-group hidden">
+            <label for="fixedInterval">固定间隔（毫秒）</label>
+            <input type="number" id="fixedInterval" value="100" min="0">
+          </div>
+          
+          <div id="randomIntervalSection" class="form-group hidden">
+            <div class="interval-inputs">
+              <div>
+                <label for="randomMin">最小间隔（毫秒）</label>
+                <input type="number" id="randomMin" value="50" min="0">
+              </div>
+              <div>
+                <label for="randomMax">最大间隔（毫秒）</label>
+                <input type="number" id="randomMax" value="150" min="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" id="generateBtn">
+            <span>生成 ULID</span>
+          </button>
+          <button class="btn btn-secondary" id="copyBtn">
+            <span>复制到剪贴板</span>
+          </button>
+          <button class="btn btn-secondary" id="downloadBtn">
+            <span>导出 CSV</span>
+          </button>
+        </div>
+        
+        <div id="statusBox" class="status-box loading">⏳ 等待生成...</div>
+        
+        <div class="section-title">生成结果</div>
+        <div class="code-wrapper">
+          <textarea id="ulidOutput" readonly placeholder="生成结果会显示在此处..."></textarea>
+        </div>
+      </div>
+
+      <div class="card right-column">
+        <div class="card-header">
+          <div class="card-icon">🔍</div>
+          <h2 class="card-title">ULID 反解析</h2>
+        </div>
+        
+        <div class="form-group">
+          <label for="ulidInput">输入 ULID</label>
+          <input type="text" id="ulidInput" placeholder="输入要解析的 ULID...">
+        </div>
+        
+        <div class="btn-group">
+          <button class="btn btn-primary" id="decodeBtn">
+            <span>反解析</span>
+          </button>
+        </div>
+        
+        <div id="ulidInfoContainer">
+          <div class="info-section">
+            <h3>基础信息</h3>
+            <div id="ulidBasicInfo">
+              <div class="info-item">
+                <div class="info-label">格式：</div>
+                <div class="info-value">26 字符 Crockford's Base32</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">组成：</div>
+                <div class="info-value">时间戳(10) + 随机值(16)</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">随机部分：</div>
+                <div class="info-value">-</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <h3>时间信息</h3>
+            <div id="ulidTimeInfo">
+              <div class="info-item">
+                <div class="info-label">ULID 值：</div>
+                <div class="info-value">-</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">时间部分：</div>
+                <div class="info-value">-</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">时间戳：</div>
+                <div class="info-value">-</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">对应时间：</div>
+                <div class="info-value">-</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <h3>ULID 特点</h3>
+            <ul style="padding-left: 1.5rem; font-size: 0.9rem; line-height: 1.6;">
+              <li><strong>128 位兼容性</strong>：ULID 使用 128 位，可以与 UUID 完全兼容，但提供了更多优势</li>
+              <li><strong>时间</strong>：ULID 以时间戳开头，可以按字典序排序，便于数据库索引和查询。时间分辨率为 1.21*10^24，限制在 65536/ms。</li>
+              <li><strong>高性能</strong>：生成速度快，无需网络或协调，适合高并发系统</li>
+              <li><strong>URL 安全</strong>：使用 Crockford 的 Base32 编码，所有字符都可在 URL 中安全使用</li>
+              <li><strong>人类可读</strong>：相比 UUID，更易于阅读和传达，不含特殊字符</li>
+              <li><strong>无需中央服务器</strong>：可以在分布式系统中独立生成，无需协调</li>
+              <li><strong>单调递增</strong>：在同一毫秒内生成的 ULID 保持单调递增，避免排序问题</li>
+              <li><strong>无碰撞</strong>：随机部分提供足够的熵，使碰撞概率极低</li>
+              <li><strong>可预测性低</strong>：包含随机成分，难以预测下一个 ID，增强安全性</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      基于 <a href="https://github.com/ulid/javascript" target="_blank">ulid/javascript</a> 和 <a href="https://github.com/f4b6a3/ulid-creator" target="_blank">ulid-creator</a> 实现的 ULID 生成工具
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ulid@2.3.0/dist/index.umd.js"></script>
+  <script>
+    // 睡眠函数
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    
+    // 生成多个 ULID
+    async function generateMultipleULIDs(count, intervalType, fixedInterval, randomMin, randomMax) {
+      const ulids = [];
+      const statusBox = document.getElementById('statusBox');
+      const output = document.getElementById('ulidOutput');
+      
+      output.value = '';
+      statusBox.className = 'status-box loading';
+      statusBox.textContent = '⏳ 正在生成...';
+      
+      // 创建一个单调递增的 ULID 生成器
+      const monotonicFactory = ULID.monotonicFactory();
+      
+      for (let i = 0; i < count; i++) {
+        const ulid = monotonicFactory();
+        ulids.push(ulid);
+        output.value += `${ulid}\n`;
+        output.scrollTop = output.scrollHeight;
+        statusBox.textContent = `⏳ 正在生成 (${i + 1} / ${count})...`;
+        
+        if (i < count - 1) {
+          if (intervalType === 'fixed') await sleep(fixedInterval);
+          if (intervalType === 'random') {
+            const delay = Math.floor(Math.random() * (randomMax - randomMin + 1)) + randomMin;
+            await sleep(delay);
+          }
+        }
+      }
+      
+      statusBox.className = 'status-box success';
+      statusBox.textContent = `✅ 已成功生成 ${count} 个 ULID`;
+      
+      return ulids;
+    }
+    
+    // 解析 ULID
+    function parseULID(ulidStr) {
+      if (!ulidStr || ulidStr.length !== 26) {
+        throw new Error('无效的 ULID');
+      }
+      
+      try {
+        const timestamp = ULID.decodeTime(ulidStr);
+        const timeChars = ulidStr.substring(0, 10);
+        const randomChars = ulidStr.substring(10);
+        
+        return {
+          time: new Date(timestamp),
+          timestamp: timestamp,
+          timeChars: timeChars,
+          randomChars: randomChars
+        };
+      } catch (e) {
+        throw new Error(`解析失败: ${e.message}`);
+      }
+    }
+    
+    // 复制到剪贴板
+    function copyToClipboard() {
+      const el = document.getElementById('ulidOutput');
+      el.select();
+      document.execCommand("copy");
+      
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box success';
+      statusBox.textContent = '✅ 已复制到剪贴板';
+      
+      setTimeout(() => {
+        statusBox.className = 'status-box loading';
+        statusBox.textContent = '⏳ 等待生成...';
+      }, 2000);
+    }
+    
+    // 导出 CSV
+    function downloadCsv() {
+      const content = document.getElementById('ulidOutput').value;
+      if (!content) {
+        const statusBox = document.getElementById('statusBox');
+        statusBox.className = 'status-box error';
+        statusBox.textContent = '❌ 没有可导出的内容';
+        setTimeout(() => {
+          statusBox.className = 'status-box loading';
+          statusBox.textContent = '⏳ 等待生成...';
+        }, 2000);
+        return;
+      }
+      
+      const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "ulid-list.csv";
+      link.click();
+      
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box success';
+      statusBox.textContent = '✅ 已导出 CSV 文件';
+      
+      setTimeout(() => {
+        statusBox.className = 'status-box loading';
+        statusBox.textContent = '⏳ 等待生成...';
+      }, 2000);
+    }
+    
+    // 解码 ULID
+    function decodeULID() {
+      const input = document.getElementById('ulidInput').value.trim();
+      const basicInfoEl = document.getElementById('ulidBasicInfo');
+      const timeInfoEl = document.getElementById('ulidTimeInfo');
+      
+      if (!input) {
+        timeInfoEl.innerHTML = `
+          <div class="status-box error" style="margin-top: 0">
+            请输入有效的 ULID
+          </div>
+        `;
+        return;
+      }
+      
+      try {
+        const parsed = parseULID(input);
+        const timestamp = parsed.timestamp;
+        const date = parsed.time;
+        
+        // 更新基础信息
+        basicInfoEl.innerHTML = `
+          <div class="info-item">
+            <div class="info-label">格式：</div>
+            <div class="info-value">26 字符 Crockford's Base32</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">组成：</div>
+            <div class="info-value">时间戳(10) + 随机值(16)</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">随机部分：</div>
+            <div class="info-value">${parsed.randomChars}</div>
+          </div>
+        `;
+        
+        // 更新时间信息
+        timeInfoEl.innerHTML = `
+          <div class="info-item">
+            <div class="info-label">ULID 值：</div>
+            <div class="info-value">${input}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">时间部分：</div>
+            <div class="info-value">${parsed.timeChars}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">时间戳：</div>
+            <div class="info-value">${timestamp} 毫秒（自 1970 年）</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">对应时间：</div>
+            <div class="info-value">${date.toLocaleString('zh-CN', { hour12: false })}.${String(date.getMilliseconds()).padStart(3, '0')}</div>
+          </div>
+        `;
+      } catch (e) {
+        // 显示错误信息
+        timeInfoEl.innerHTML = `
+          <div class="status-box error" style="margin-top: 0">
+            ❌ 无法解析 ULID：${e.message}
+          </div>
+        `;
+      }
+    }
+    
+    // 事件监听器
+    document.addEventListener('DOMContentLoaded', () => {
+      // 生成按钮
+      document.getElementById('generateBtn').addEventListener('click', async () => {
+        const count = parseInt(document.getElementById('count').value) || 10;
+        const intervalType = document.querySelector('input[name="intervalType"]:checked').value;
+        const fixedInterval = parseInt(document.getElementById('fixedInterval').value) || 100;
+        const randomMin = parseInt(document.getElementById('randomMin').value) || 50;
+        const randomMax = parseInt(document.getElementById('randomMax').value) || 150;
+        
+        await generateMultipleULIDs(
+          Math.min(count, 1000), 
+          intervalType, 
+          fixedInterval, 
+          randomMin, 
+          randomMax
+        );
+      });
+      
+      // 复制按钮
+      document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
+      
+      // 导出按钮
+      document.getElementById('downloadBtn').addEventListener('click', downloadCsv);
+      
+      // 解码按钮
+      document.getElementById('decodeBtn').addEventListener('click', decodeULID);
+      
+      // ULID 输入框回车事件
+      document.getElementById('ulidInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          decodeULID();
+        }
+      });
+      
+      // 间隔类型切换
+      document.querySelectorAll('input[name="intervalType"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const type = document.querySelector('input[name="intervalType"]:checked').value;
+          document.getElementById('fixedIntervalSection').classList.toggle('hidden', type !== 'fixed');
+          document.getElementById('randomIntervalSection').classList.toggle('hidden', type !== 'random');
+        });
+      });
+      
+      // 生成一个示例 ULID 并填入解析输入框
+      const exampleUlid = ULID.ulid();
+      document.getElementById('ulidInput').value = exampleUlid;
+      decodeULID();
+    });
+  </script>
+</body>
+</html>

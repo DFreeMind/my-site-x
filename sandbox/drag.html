@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Interactive Road Model</title>
+		<style>
+			#modelList {
+				width: 200px;
+				height: 400px;
+				float: left;
+				overflow-y: scroll;
+				border: 1px solid #ccc;
+			}
+
+			#roadCanvas {
+				width: 80vw;
+				height: 100vh;
+				float: left;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="modelList">
+			<!-- 左侧模型列表 -->
+			<div id="roadSign" draggable="true">道路标志</div>
+			<div id="safetyPylon" draggable="true">安全桩</div>
+			<!-- 添加更多模型... -->
+		</div>
+		<div id="mousePosition"></div>
+		<div id="roadCanvas"></div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+		<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+		<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+		<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+		<script src="https://unpkg.com/three@0.128.0/examples/js/controls/DragControls.js"></script>
+		<script>
+			const modelList = document.getElementById('modelList');
+			const roadCanvas = document.getElementById('roadCanvas');
+
+			const scene = new THREE.Scene();
+			const camera = new THREE.PerspectiveCamera(75, roadCanvas.clientWidth / roadCanvas.clientHeight, 0.1, 1000);
+			const renderer = new THREE.WebGLRenderer({
+				antialias: true
+			});
+			renderer.setSize(roadCanvas.clientWidth, roadCanvas.clientHeight);
+			roadCanvas.appendChild(renderer.domElement);
+			camera.position.set(-23, 23, 1);
+
+			const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+			scene.add(ambientLight);
+
+			const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+			directionalLight.position.set(0, 1, 0);
+			scene.add(directionalLight);
+
+			// 加载GLB模型
+			const loader = new THREE.GLTFLoader();
+			let model;
+			// 获取场景中的所有物体
+			const allObjects = [];
+
+			loader.load('model/road.glb', (gltf) => {
+				model = gltf.scene;
+				scene.add(model);
+				// 创建OrbitControls以启用鼠标交互
+				const controls = new THREE.OrbitControls(camera, renderer.domElement);
+				controls.target.set(0, 0, 0);
+
+
+				// 监听窗口大小变化
+				window.addEventListener('resize', () => {
+					const newWidth = window.innerWidth;
+					const newHeight = window.innerHeight;
+					camera.aspect = newWidth / newHeight;
+					camera.updateProjectionMatrix();
+					renderer.setSize(newWidth, newHeight);
+				});
+				// 在加载完成后，使用 traverse 遍历模型的全部对象
+				model.traverse((object) => {
+					// 检查对象是否是 Mesh 或其他您感兴趣的类型
+					if (object instanceof THREE.Mesh) {
+						allObjects.push(object);
+					}
+				});
+			});
+
+			// 加载GLB模型
+			const objloader = new THREE.OBJLoader();
+			let objmodel;
+
+			objloader.load('model/traffic_cone.obj', (gltf) => {
+				objmodel = gltf;
+				// scene.add(objmodel);
+				// 创建OrbitControls以启用鼠标交互
+				// 	const controls = new THREE.OrbitControls(camera, renderer.domElement);
+				// 	controls.target.set(0, 0, 0);
+
+
+				// 	// 监听窗口大小变化
+				// 	window.addEventListener('resize', () => {
+				// 	    const newWidth = window.innerWidth;
+				// 	    const newHeight = window.innerHeight;
+				// 	    camera.aspect = newWidth / newHeight;
+				// 	    camera.updateProjectionMatrix();
+				// 	    renderer.setSize(newWidth, newHeight);
+				// 	});
+			});
+
+			// 获取显示鼠标位置的元素
+			const mousePosition = document.getElementById('mousePosition');
+
+			var raycaster = new THREE.Raycaster();
+			// 定义一个变量用于存储当前鼠标位置
+			const mouse = new THREE.Vector2();
+
+			// 添加鼠标移动事件监听器，用于更新鼠标位置
+			roadCanvas.addEventListener('mousemove', (event) => {
+				// 计算鼠标位置在画布中的归一化坐标
+				mouse.x = (event.clientX / roadCanvas.clientWidth) * 2 - 1;
+				mouse.y = -(event.clientY / roadCanvas.clientHeight) * 2 + 1;
+
+				// 更新显示鼠标位置的元素
+				mousePosition.textContent = `Mouse Position: (${mouse.x.toFixed(2)}, ${mouse.y.toFixed(2)})`;
+			});
+
+			modelList.addEventListener('dragstart', (event) => {
+				event.dataTransfer.setData('text/plain', event.target.id);
+			});
+
+			roadCanvas.addEventListener('dragover', (event) => {
+				event.preventDefault();
+			});
+
+
+			roadCanvas.addEventListener('drop', (event) => {
+				event.preventDefault();
+				const modelName = event.dataTransfer.getData('text/plain');
+
+				// Get 3D vector from 3D mouse position using 'unproject' function
+				// 使用raycaster将鼠标位置转换为世界坐标
+				const raycaster = new THREE.Raycaster();
+				raycaster.setFromCamera(mouse, camera);
+
+				// Find all intersected objects
+				var intersects = raycaster.intersectObjects(allObjects, true);
+
+				if (intersects.length > 0) {
+					// 如果有交点，将模型放置在第一个交点的位置
+					const position = intersects[0].point;
+					if (modelName === 'roadSign') {
+						// const geometry = new THREE.BoxGeometry(1, 1, 0.1);
+						// const material = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
+						// const roadSign = new THREE.Mesh(geometry, material);
+						// roadSign.position.set(0, 0, 0);
+						dupobj = objmodel.clone(true);
+						//dupobj.position.set(position.x, position.y, 10);
+						position.z = position.z + 10;
+						dupobj.position.copy(position);
+						scene.add(dupobj);
+					} else if (modelName === 'safetyPylon') {
+						const geometry = new THREE.CylinderGeometry(0.05, 0.05, 1, 32);
+						const material = new THREE.MeshBasicMaterial({
+							color: 0xFF9900
+						});
+						const safetyPylon = new THREE.Mesh(geometry, material);
+						safetyPylon.position.set(0, 0.5, 0);
+						scene.add(safetyPylon);
+					}
+
+					renderer.render(scene, camera);
+				}
+			});
+
+			const animate = () => {
+				requestAnimationFrame(animate);
+				renderer.render(scene, camera);
+			};
+
+			animate();
+		</script>
+	</body>
+</html>

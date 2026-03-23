@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Three.js GLB Model Highlight</title>
+	</head>
+	<body>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+		<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+		<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+		<script src="https://unpkg.com/three@0.128.0/examples/js/controls/DragControls.js"></script>
+		<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+
+		<script>
+			// 创建场景
+			const scene = new THREE.Scene();
+
+			// 创建摄像机
+			const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+			// camera.position.z = -12;
+			camera.position.set(-23, 23, 0);
+			console.log(camera.position)
+
+
+			// 创建渲染器
+			const renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+			// 添加光源
+			const light = new THREE.AmbientLight(0xffffff);
+			scene.add(light);
+
+			// 加载GLB模型
+			const loader = new THREE.GLTFLoader();
+			let model;
+
+			loader.load('model/road.glb', (gltf) => {
+				model = gltf.scene;
+				scene.add(model);
+				// 创建OrbitControls以启用鼠标交互
+				const controls = new THREE.OrbitControls(camera, renderer.domElement);
+				controls.target.set(0, 0, 0);
+
+
+				// 监听窗口大小变化
+				window.addEventListener('resize', () => {
+					const newWidth = window.innerWidth;
+					const newHeight = window.innerHeight;
+					camera.aspect = newWidth / newHeight;
+					camera.updateProjectionMatrix();
+					renderer.setSize(newWidth, newHeight);
+				});
+			});
+			// 加载GLB模型
+			const objloader = new THREE.OBJLoader();
+			let objmodel;
+
+			objloader.load('model/traffic_cone.obj', (gltf) => {
+				objmodel = gltf;
+			});
+
+			// 创建一个点击事件监听器
+			const raycaster = new THREE.Raycaster();
+			const mouse = new THREE.Vector2();
+			const highlightColor = 0xff0000;
+
+			document.addEventListener('mousemove', (event) => {
+				mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+				mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+			});
+
+			document.addEventListener('dblclick', () => {
+				if (model) {
+					raycaster.setFromCamera(mouse, camera);
+					const intersects = raycaster.intersectObject(model, true);
+
+					if (intersects.length > 0) {
+						const selectedObject = intersects[0].object;
+						const originalColor = selectedObject.material.color.getHex();
+						selectedObject.material.color.setHex(highlightColor);
+
+						// 添加物品
+						var flagGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+						var flagMaterial = new THREE.MeshBasicMaterial({
+							color: 0x00ff00
+						});
+						var flagMesh = new THREE.Mesh(flagGeometry, flagMaterial);
+						scene.add(flagMesh);
+						var intersection = intersects[0];
+						flagMesh.position.copy(intersection.point);
+						
+						const dupobj = objmodel.clone(true);
+						dupobj.position.copy(intersection.point);
+						scene.add(dupobj);
+						
+						setTimeout(() => {
+							selectedObject.material.color.setHex(originalColor);
+						}, 1000);
+					}
+				}
+			});
+
+			// 设置渲染循环
+			const animate = () => {
+				requestAnimationFrame(animate);
+
+				// 渲染场景
+				renderer.render(scene, camera);
+				//console.log(camera.position)
+			};
+
+			animate();
+		</script>
+	</body>
+</html>
