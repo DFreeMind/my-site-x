@@ -1,0 +1,35 @@
+# 本地配置
+.claude/
+.gstack/
+
+# 编辑器
+.vscode/
+.idea/
+*.sublime-*
+
+# 操作系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志和临时文件
+*.log
+*.tmp
+*.temp
+~*
+
+# 备份文件
+*.bak
+*.backup
+
+# 环境配置
+.env
+.env.local
+
+# 节点模块
+node_modules/
+
+# 构建产物
+dist/
+build/
+out/
